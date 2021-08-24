@@ -41,10 +41,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -93,7 +90,7 @@ public class JobManager {
       Component.text("New Job: 4m").color(TextColor.color(0, 128, 255)),
       Component.text("New Job: 5m").color(TextColor.color(0, 128, 255))
   );
-  private final TextComponent jobAccepted = Component.text("[JOB ACCEPTED]")
+  private final TextComponent jobAccepted = Component.text("[JOB CLAIMED]")
       .color(TextColor.color(142, 34, 17)).decoration(TextDecoration.BOLD, true);
   private final TextComponent clickForInfo = Component.text("[Click For Info!]")
       .color(TextColor.color(255, 230, 255));
@@ -285,7 +282,7 @@ public class JobManager {
         acceptedJobs.put(player.getUniqueId(), job);
         postedJob.setJob(null);
         postedJob.setSeconds(315);
-        updatePostingSign(job.getBoard(), postedJob);
+        updatePostingSign(postedJob, false);
         TitleUtils.sendTitle(player,
             StringExtensionsKt.chatColorize("&2JOB ACCEPTED"),
             StringExtensionsKt.chatColorize("&eGET THAT BREADDDDD"));
@@ -344,18 +341,18 @@ public class JobManager {
           }
           postedJob.setJob(job);
           postedJob.setSeconds(315);
-          updatePostingSign(board, postedJob);
+          updatePostingSign(postedJob, true);
           continue;
         }
         if (postedJob.getSeconds() % 60 == 0) {
-          updatePostingSign(board, postedJob);
+          updatePostingSign(postedJob, false);
         }
         postedJob.setSeconds(postedJob.getSeconds() - 1);
       }
     }
   }
 
-  private void updatePostingSign(JobBoard board, PostedJob postedJob) {
+  private void updatePostingSign(PostedJob postedJob, boolean effects) {
     Location location = postedJob.getLocation();
     Sign sign = (Sign) location.getBlock().getState();
     sign.setEditable(true);
@@ -374,6 +371,11 @@ public class JobManager {
     }
     sign.setEditable(false);
     sign.update();
+    if (effects) {
+      Location effectLoc = location.clone().add(0.5, 0.5, 0.5);
+      effectLoc.getWorld().playSound(effectLoc, Sound.ENTITY_VILLAGER_WORK_CARTOGRAPHER, 1, 1f);
+      effectLoc.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, effectLoc, 15, 0.5, 0.5, 0.5);
+    }
   }
 
   public void saveBoards() {
