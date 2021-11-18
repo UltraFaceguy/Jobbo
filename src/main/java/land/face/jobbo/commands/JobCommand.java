@@ -3,6 +3,7 @@ package land.face.jobbo.commands;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.shade.acf.BaseCommand;
 import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandAlias;
+import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandCompletion;
 import com.tealcube.minecraft.bukkit.shade.acf.annotation.Default;
 import com.tealcube.minecraft.bukkit.shade.acf.annotation.Subcommand;
 import land.face.jobbo.JobboPlugin;
@@ -42,12 +43,13 @@ public class JobCommand extends BaseCommand {
     JobboPlugin.getApi().getJobManager().clearAllBoardJobs();
   }
 
-  @Subcommand("board add")
-  public void addBoard(CommandSender sender, String boardId) {
+  @Subcommand("board create")
+  public void createBoard(CommandSender sender, String boardId) {
     JobboPlugin.getApi().getJobManager().createBoard(boardId);
   }
 
-  @Subcommand("board add location")
+  @CommandCompletion("@boards")
+  @Subcommand("board addSign")
   public void addLocation(Player sender, String boardId) {
     JobBoard jobBoard = JobboPlugin.getApi().getJobManager().getBoard(boardId);
     if (jobBoard == null) {
@@ -63,13 +65,23 @@ public class JobCommand extends BaseCommand {
     jobBoard.addLocation(block.getLocation());
   }
 
-  @Subcommand("board add template")
+  @CommandCompletion("@boards @templates")
+  @Subcommand("board addTemplate")
   public void addTemplate(Player sender, String boardId, String templateId) {
     JobBoard jobBoard = JobboPlugin.getApi().getJobManager().getBoard(boardId);
     if (jobBoard == null) {
-      MessageUtils.sendMessage(sender, "this board does not exist");
+      MessageUtils.sendMessage(sender, "&eFailed! This board doesn't exist!");
+      return;
+    }
+    if (!plugin.getJobManager().getTemplates().contains(templateId)) {
+      MessageUtils.sendMessage(sender, "&eFailed! This template doesn't exist!");
+      return;
+    }
+    if (jobBoard.getTemplateIds().contains(templateId)) {
+      MessageUtils.sendMessage(sender, "&eFailed! This board already has that template!");
       return;
     }
     jobBoard.getTemplateIds().add(templateId);
+    MessageUtils.sendMessage(sender, "&aSuccess! Added " + templateId + " to " + boardId);
   }
 }

@@ -11,6 +11,7 @@ import io.pixeloutlaw.minecraft.spigot.garbage.StringExtensionsKt;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import land.face.jobbo.JobboPlugin;
 import land.face.jobbo.data.Job;
 import land.face.jobbo.data.JobBoard;
@@ -132,6 +134,14 @@ public class JobManager {
       }
     }
     return null;
+  }
+
+  public List<String> getBoards() {
+    return jobBoards.stream().map(JobBoard::getId).collect(Collectors.toList());
+  }
+
+  public List<String> getTemplates() {
+    return new ArrayList<>(loadedTemplates.keySet());
   }
 
   public JobTemplate getJobTemplate(String id) {

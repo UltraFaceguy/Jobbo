@@ -74,6 +74,11 @@ public class JobboPlugin extends JavaPlugin {
     PaperCommandManager commandManager = new PaperCommandManager(this);
     commandManager.registerCommand(new JobCommand(this));
 
+    commandManager.getCommandCompletions()
+        .registerCompletion("boards", c -> jobManager.getBoards());
+    commandManager.getCommandCompletions()
+        .registerCompletion("templates", c -> jobManager.getTemplates());
+
     setupEconomy();
     if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
       new JobboPlaceholders().register();
@@ -124,6 +129,10 @@ public class JobboPlugin extends JavaPlugin {
 
   public JobsMenu getStatusMenu() {
     return statusMenu;
+  }
+
+  public JobManager getJobManager() {
+    return jobManager;
   }
 
 }

@@ -1,7 +1,9 @@
 package land.face.jobbo.data;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
