@@ -47,7 +47,6 @@ public class JobboPlugin extends JavaPlugin {
     List<VersionedSmartYamlConfiguration> configurations = new ArrayList<>();
     VersionedSmartYamlConfiguration configYAML;
     configurations.add(configYAML = defaultSettingsLoad("config.yml"));
-    VersionedSmartYamlConfiguration templatesYAML = defaultSettingsLoad("templates.yml");
 
     for (VersionedSmartYamlConfiguration config : configurations) {
       if (config.update()) {
@@ -63,7 +62,7 @@ public class JobboPlugin extends JavaPlugin {
 
     jobManager = new JobManager(this);
     jobManager.loadBoards();
-    jobManager.loadTemplates(templatesYAML);
+    jobManager.loadAllTemplates();
 
     Bukkit.getPluginManager().registerEvents(new SignClickListener(), this);
     Bukkit.getPluginManager().registerEvents(new BuiltInTaskListener(), this);
@@ -87,7 +86,7 @@ public class JobboPlugin extends JavaPlugin {
     JobBoardTicker boardTicker = new JobBoardTicker();
     boardTicker.runTaskTimer(this, 200L, 20L);
 
-    AcceptJobMenu acceptMenu = new AcceptJobMenu(this);
+    AcceptJobMenu acceptMenu = new AcceptJobMenu(this, configYAML.getString("language.accept-menu-name", "|black|Accept Job?"));
     AcceptJobMenu.setInstance(acceptMenu);
 
     statusMenu = new JobsMenu(this);

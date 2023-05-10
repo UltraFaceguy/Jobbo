@@ -24,6 +24,8 @@ public class Job {
   @Getter
   @Setter
   private int money, xp;
+  @Getter @Setter
+  private boolean moneyBonus = false;
   @Getter
   private final List<ItemStack> itemRewards = new ArrayList<>();
 

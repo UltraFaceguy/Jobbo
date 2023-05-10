@@ -19,7 +19,8 @@
 package land.face.jobbo.menus.icons;
 
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
-import io.pixeloutlaw.minecraft.spigot.garbage.StringExtensionsKt;
+import com.tealcube.minecraft.bukkit.facecore.utilities.PaletteUtil;
+import io.pixeloutlaw.minecraft.spigot.hilt.ItemStackExtensionsKt;
 import java.util.List;
 import land.face.jobbo.JobboPlugin;
 import land.face.jobbo.data.Job;
@@ -38,13 +39,15 @@ public class AcceptIcon extends MenuItem {
   public AcceptIcon() {
     super("", new ItemStack(Material.AIR));
   }
+  private static final String acceptText = PaletteUtil.color("|cyan||b|Click To Accept!");
 
   @Override
   public ItemStack getFinalIcon(Player player) {
-    ItemStack stack = new ItemStack(Material.WRITABLE_BOOK);
+    ItemStack stack = new ItemStack(Material.BARRIER);
+    ItemStackExtensionsKt.setCustomModelData(stack, 50);
     Job job = AcceptJobMenu.getInstance().getSelectedJob().get(player);
     List<String> lore = JobInfoIcon.buildCoreLore(stack, job);
-    lore.add(StringExtensionsKt.chatColorize("&b&lClick To Accept!"));
+    lore.add(acceptText);
     stack.setLore(lore);
     return stack;
   }

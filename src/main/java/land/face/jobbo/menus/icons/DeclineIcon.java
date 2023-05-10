@@ -35,6 +35,7 @@ public class DeclineIcon extends MenuItem {
   @Override
   public ItemStack getFinalIcon(Player player) {
     ItemStack stack = new ItemStack(Material.BARRIER);
+    ItemStackExtensionsKt.setCustomModelData(stack, 50);
     ItemStackExtensionsKt.setDisplayName(stack, ChatColor.RED + "DECLINE JOB");
     //ItemStackExtensionsKt.setLore(stack, TextUtils.color(lore));
     return stack;

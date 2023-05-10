@@ -18,6 +18,7 @@
  */
 package land.face.jobbo.menus;
 
+import com.tealcube.minecraft.bukkit.facecore.utilities.PaletteUtil;
 import io.pixeloutlaw.minecraft.spigot.garbage.StringExtensionsKt;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -44,12 +45,12 @@ public class AcceptJobMenu extends ItemMenu {
   @Getter
   private final Map<Player, Job> selectedJob = new WeakHashMap<>();
 
-  public AcceptJobMenu(JobboPlugin plugin) {
-    super(StringExtensionsKt.chatColorize("&0Accept Job?"), Size.fit(27), plugin);
+  public AcceptJobMenu(JobboPlugin plugin, String name) {
+    super(StringExtensionsKt.chatColorize(name), Size.fit(27), plugin);
     this.plugin = plugin;
     setItem(11, new AcceptIcon());
+    setItem(12, new AcceptIcon());
     setItem(15, new DeclineIcon());
-    fillEmptySlots(new BlankIcon());
   }
 
   public void openForPlayer(Player player, Job job) {

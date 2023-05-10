@@ -18,11 +18,10 @@
  */
 package land.face.jobbo.menus.icons;
 
-import io.pixeloutlaw.minecraft.spigot.garbage.StringExtensionsKt;
+import com.tealcube.minecraft.bukkit.facecore.utilities.PaletteUtil;
 import io.pixeloutlaw.minecraft.spigot.hilt.ItemStackExtensionsKt;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import land.face.jobbo.JobboPlugin;
 import land.face.jobbo.data.Job;
 import land.face.jobbo.data.JobTemplate;
@@ -45,8 +44,7 @@ public class JobInfoIcon extends MenuItem {
     ItemStack stack = new ItemStack(Material.PAPER);
     Job job = JobboPlugin.getApi().getJobManager().getJob(player);
     List<String> lore = buildCoreLore(stack, job);
-    lore.add(StringExtensionsKt.chatColorize(
-        "&b&lProgress: &f[ " + job.getProgress() + "/" + job.getProgressCap() + " ]"));
+    lore.add(PaletteUtil.color("|cyan||Progress: |white|[ " + job.getProgress() + "/" + job.getProgressCap() + " ]"));
     stack.setLore(lore);
     return stack;
   }
@@ -60,35 +58,38 @@ public class JobInfoIcon extends MenuItem {
 
   public static List<String> buildCoreLore(ItemStack stack, Job job) {
     JobTemplate jobTemplate = job.getTemplate();
-    ItemStackExtensionsKt.setDisplayName(stack, StringExtensionsKt
-        .chatColorize("&d&l" + ChatColor.stripColor(jobTemplate.getJobName())));
+    ItemStackExtensionsKt.setDisplayName(stack, PaletteUtil.color("|purple||b|" + ChatColor.stripColor(jobTemplate.getJobName())));
     List<String> lore = new ArrayList<>();
     lore.add("");
-    lore.addAll(jobTemplate.getDescription().stream().map(
-        line -> line.replaceAll("%num%", String.valueOf(Integer.valueOf(job.getProgressCap()))))
-        .collect(Collectors.toList()));
+    lore.addAll(jobTemplate.getDescription().stream().map(line ->
+            line.replaceAll("%num%", String.valueOf(Integer.valueOf(job.getProgressCap()))))
+        .toList());
     lore.add("");
-    lore.add(StringExtensionsKt.chatColorize("&a&lRewards:"));
+    lore.add(PaletteUtil.color("|lgreen||b|Rewards:"));
     for (ItemStack rewardItem : job.getItemRewards()) {
-      String amount = "&b" + rewardItem.getAmount() + "x ";
+      String amount = "|cyan|" + rewardItem.getAmount() + "x ";
       String name = ItemStackExtensionsKt.getDisplayName(rewardItem);
-      lore.add(StringExtensionsKt.chatColorize(amount + name));
+      lore.add(PaletteUtil.color(amount + name));
     }
     if (JobboPlugin.isStrifeEnabled() && !jobTemplate.getSkillXpReward().isEmpty()) {
       for (LifeSkillType lifeSkillType : jobTemplate.getSkillXpReward().keySet()) {
         lore.add(lifeSkillType.getColor() + " " + jobTemplate.getSkillXpReward()
-            .get(lifeSkillType) + " " + lifeSkillType.getName() + " XP");
+            .get(lifeSkillType) + " " + lifeSkillType.getPrettyName() + " XP");
       }
     }
     if (job.getXp() > 0) {
-      lore.add(StringExtensionsKt.chatColorize("&a " + job.getXp() + " Combat XP"));
+      lore.add(PaletteUtil.color("|lgreen| " + job.getXp() + " Combat XP"));
     }
     if (job.getMoney() > 0) {
-      lore.add(StringExtensionsKt.chatColorize("&e " + job.getMoney() + "◎"));
+      String moneyz = PaletteUtil.color("|yellow| " + job.getMoney() + "◎");
+      if (job.isMoneyBonus()) {
+        moneyz += PaletteUtil.color("  |orange_shake||b|In Demand Bonus!");
+      }
+      lore.add(moneyz);
     }
     // TODO: gems
     if (true == false) {
-      lore.add(StringExtensionsKt.chatColorize("&d " + job.getXp() + "▼"));
+      lore.add(PaletteUtil.color("|purple| " + job.getXp() + "|white|▼"));
     }
     lore.add("");
     return lore;

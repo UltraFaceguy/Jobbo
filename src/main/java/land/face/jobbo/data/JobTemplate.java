@@ -65,11 +65,16 @@ public class JobTemplate {
     int totalCap = taskCap + (bonusCap > 0 ? random.nextInt(bonusCap + 1) : 0);
     Job job = new Job(this, board, jobType, dataStringOne, dataStringTwo, totalCap);
 
-    int moneyTotal = moneyReward + (bonusMoney > 0 ? random.nextInt(bonusMoney + 1) : 0);
-    int xpTotal = xpReward + (bonusXp > 0 ? random.nextInt(bonusXp + 1) : 0);
+    double moneyTotal = moneyReward + (bonusMoney > 0 ? random.nextInt(bonusMoney + 1) : 0);
+    double xpTotal = xpReward + (bonusXp > 0 ? random.nextInt(bonusXp + 1) : 0);
 
-    job.setMoney(moneyTotal);
-    job.setXp(xpTotal);
+    if (Math.random() < 0.02) {
+      moneyTotal *= 2 + Math.random() * 4;
+      job.setMoneyBonus(true);
+    }
+
+    job.setMoney((int) moneyTotal);
+    job.setXp((int) xpTotal);
     return job;
   }
 }

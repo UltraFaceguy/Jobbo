@@ -1,13 +1,14 @@
 package land.face.jobbo.managers;
 
-import com.tealcube.minecraft.bukkit.facecore.utilities.AdvancedActionBarUtil;
+import com.tealcube.minecraft.bukkit.facecore.utilities.FaceColor;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
+import com.tealcube.minecraft.bukkit.facecore.utilities.PaletteUtil;
 import com.tealcube.minecraft.bukkit.facecore.utilities.TitleUtils;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
+import io.pixeloutlaw.minecraft.spigot.config.SmartYamlConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
-import io.pixeloutlaw.minecraft.spigot.garbage.ListExtensionsKt;
-import io.pixeloutlaw.minecraft.spigot.garbage.StringExtensionsKt;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -38,12 +40,12 @@ import land.face.strife.util.StatUtil;
 import land.face.waypointer.WaypointerPlugin;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -60,42 +62,32 @@ public class JobManager {
 
   private final Random random = new Random();
 
-  private final List<TextComponent> starRating = Arrays.asList(
-      Component.text("✦✦✦✦✦").color(TextColor.color(0, 0, 0)),
-      Component.text("✦").color(TextColor.color(	67, 214, 35)).append(
-          Component.text("✦✦✦✦").color(TextColor.color(0, 0, 0))
-      ),
-      Component.text("✦✦").color(TextColor.color(171, 214, 35)).append(
-          Component.text("✦✦✦").color(TextColor.color(0, 0, 0))
-      ),
-      Component.text("✦✦✦").color(TextColor.color(222, 193, 53)).append(
-          Component.text("✦✦").color(TextColor.color(0, 0, 0))
-      ),
-      Component.text("✦✦✦✦").color(TextColor.color(		214, 109, 35)).append(
-          Component.text("✦").color(TextColor.color(0, 0, 0))
-      ),
-      Component.text("✦✦✦✦✦").color(TextColor.color(255, 77, 77))
+  private final List<String> starRating = Arrays.asList(
+      FaceColor.BLACK + "✦✦✦✦✦",
+      FaceColor.GREEN + "✦" + FaceColor.BLACK + "✦✦✦✦",
+      FaceColor.LIME + "✦✦" + FaceColor.BLACK + "✦✦✦",
+      FaceColor.YELLOW + "✦✦✦" + FaceColor.BLACK + "✦✦",
+      FaceColor.ORANGE + "✦✦✦✦" + FaceColor.BLACK + "✦",
+      FaceColor.RED + "✦✦✦✦✦"
   );
-  private final List<TextComponent> timeLeft = Arrays.asList(
-      Component.text("Time Left: 0m").color(TextColor.color(0, 228, 217)),
-      Component.text("Time Left: 1m").color(TextColor.color(0, 128, 255)),
-      Component.text("Time Left: 2m").color(TextColor.color(0, 128, 255)),
-      Component.text("Time Left: 3m").color(TextColor.color(0, 128, 255)),
-      Component.text("Time Left: 4m").color(TextColor.color(0, 128, 255)),
-      Component.text("Time Left: 5m").color(TextColor.color(0, 128, 255))
+  private final List<String> timeLeft = Arrays.asList(
+      FaceColor.CYAN + "Time Left: 0m",
+      FaceColor.BLUE + "Time Left: 1m",
+      FaceColor.BLUE + "Time Left: 2m",
+      FaceColor.BLUE + "Time Left: 3m",
+      FaceColor.BLUE + "Time Left: 4m",
+      FaceColor.BLUE + "Time Left: 5m"
   );
-  private final List<TextComponent> newJob = Arrays.asList(
-      Component.text("New Job: 0m").color(TextColor.color(0, 128, 255)),
-      Component.text("New Job: 1m").color(TextColor.color(0, 128, 255)),
-      Component.text("New Job: 2m").color(TextColor.color(0, 128, 255)),
-      Component.text("New Job: 3m").color(TextColor.color(0, 128, 255)),
-      Component.text("New Job: 4m").color(TextColor.color(0, 128, 255)),
-      Component.text("New Job: 5m").color(TextColor.color(0, 128, 255))
+  private final List<String> newJob = Arrays.asList(
+      FaceColor.BLUE + "New Job: 0m",
+      FaceColor.BLUE + "New Job: 1m",
+      FaceColor.BLUE + "New Job: 2m",
+      FaceColor.BLUE + "New Job: 3m",
+      FaceColor.BLUE + "New Job: 4m",
+      FaceColor.BLUE + "New Job: 5m"
   );
-  private final TextComponent jobAccepted = Component.text("[JOB CLAIMED]")
-      .color(TextColor.color(142, 34, 17)).decoration(TextDecoration.BOLD, true);
-  private final TextComponent clickForInfo = Component.text("[Click For Info!]")
-      .color(TextColor.color(255, 230, 255));
+  private final String jobAccepted = FaceColor.DARK_ORANGE + FaceColor.BOLD.s() + "[JOB CLAIMED]";
+  private final String clickForInfo = FaceColor.WHITE + "[Click For Info!]";
 
   public JobManager(JobboPlugin plugin) {
     this.plugin = plugin;
@@ -196,10 +188,11 @@ public class JobManager {
     if (job != null) {
       boolean complete = job.increment(amount);
       if (!complete) {
-        AdvancedActionBarUtil.addOverrideMessage(player, "JOB-UPDATE",
-            "&aJOB [" + job.getProgress() + "/" + job.getProgressCap() + "]", 30);
+        StrifePlugin.getInstance().getBossBarManager().updateBar(player, 4, 0,
+            FaceColor.LIME + "Job Progress [" + job.getProgress() + "/" + job.getProgressCap() + "]", 100);
       } else {
-        AdvancedActionBarUtil.addOverrideMessage(player, "JOB-UPDATE", "&aJOB &fCOMPLETE!", 30);
+        StrifePlugin.getInstance().getBossBarManager().updateBar(player, 4, 0,
+            FaceColor.LIME + "JOB COMPLETE!", 100);
         doCompletion(player, job);
       }
     }
@@ -220,8 +213,8 @@ public class JobManager {
             .setWaypoint(player, "Job Turn-in", wpLoc);
       }
       player.playSound(player.getLocation(), Sound.UI_TOAST_IN, 5, 1);
-      MessageUtils.sendMessage(player, "&2Job Task Finished! &aInform the person who issued" +
-          " the job that you've finished it for your reward!");
+      PaletteUtil.sendMessage(player, "|green|Job Task Finished! |lgreen|Inform the person who issued" +
+          " the job that you're done to get your reward!");
     } else {
       awardPlayer(player, job);
     }
@@ -232,15 +225,13 @@ public class JobManager {
     Bukkit.getPluginManager().callEvent(jobCompleteEvent);
     clearJobCooldown(player);
     if (StringUtils.isNotBlank(job.getTemplate().getCompletionMessage())) {
-      MessageUtils.sendMessage(player, job.getTemplate().getCompletionMessage());
+      PaletteUtil.sendMessage(player, job.getTemplate().getCompletionMessage());
     }
-    MessageUtils.sendMessage(player,
-        "&2&lJOB COMPLETE! &aWell done! You can now accept a new job at the job board!");
+    PaletteUtil.sendMessage(player, "|green||b|JOB COMPLETE! |lgreen|Well done! You can now accept a new job at the job board!");
     player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5, 2);
     acceptedJobs.remove(player.getUniqueId(), job);
     if (JobboPlugin.isStrifeEnabled()) {
-      StrifePlugin.getInstance().getExperienceManager().addExperience(
-          player, job.getXp(), true);
+      StrifePlugin.getInstance().getExperienceManager().addExperience(player, job.getXp(), true);
       for (LifeSkillType skill : job.getTemplate().getSkillXpReward().keySet()) {
         StrifePlugin.getInstance().getSkillExperienceManager().addExperience(
             player, skill, job.getTemplate().getSkillXpReward().get(skill), true, true);
@@ -294,10 +285,9 @@ public class JobManager {
         postedJob.setSeconds(315);
         updatePostingSign(postedJob, false);
         TitleUtils.sendTitle(player,
-            StringExtensionsKt.chatColorize("&2JOB ACCEPTED"),
-            StringExtensionsKt.chatColorize("&eGET THAT BREADDDDD"));
-        MessageUtils.sendMessage(player,
-            "&2&lJOB ACCEPTED! &aCheck &e/job &afor status and waypoints!");
+            PaletteUtil.color("|green|JOB ACCEPTED"),
+            PaletteUtil.color("|yellow|GET THAT BREADDDDD"));
+        PaletteUtil.sendMessage(player, "|green||b|JOB ACCEPTED! |lgreen|Check |yellow|/job |lgreen|for status and waypoints!");
         player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_WORK_CARTOGRAPHER, 5, 1);
         abandonCooldown.put(player.getUniqueId(), System.currentTimeMillis() + 300000);
         if (JobboPlugin.isWaypointerEnabled() && job.getTemplate().getLocation() != null) {
@@ -350,7 +340,7 @@ public class JobManager {
             continue;
           }
           postedJob.setJob(job);
-          postedJob.setSeconds(315);
+          postedJob.setSeconds(290 + (int) (30D * Math.random()));
           updatePostingSign(postedJob, true);
           continue;
         }
@@ -367,23 +357,22 @@ public class JobManager {
     Sign sign = (Sign) location.getBlock().getState();
     sign.setEditable(true);
     if (postedJob.getJob() == null) {
-      sign.line(0, Component.text(""));
-      sign.line(1, jobAccepted);
-      sign.line(2, newJob.get((int) Math.round((double) postedJob.getSeconds() / 60)));
-      sign.line(3, Component.text(""));
+      sign.setLine(0, "");
+      sign.setLine(1, jobAccepted);
+      sign.setLine(2, newJob.get((int) Math.round((double) postedJob.getSeconds() / 60)));
+      sign.setLine(3,"");
     } else {
       JobTemplate template = postedJob.getJob().getTemplate();
-      sign.line(0, Component.text(postedJob.getJob().getTaskType() + " JOB")
-          .color(TextColor.color(0, 204, 0)).decoration(TextDecoration.BOLD, true));
-      sign.line(1, starRating.get(template.getDifficulty()));
-      sign.line(2, timeLeft.get((int) Math.round((double) postedJob.getSeconds() / 60)));
-      sign.line(3, clickForInfo);
+      sign.setLine(0, FaceColor.LIGHT_GREEN + FaceColor.BOLD.s() + postedJob.getJob().getTaskType() + " JOB");
+      sign.setLine(1, starRating.get(template.getDifficulty()));
+      sign.setLine(2, timeLeft.get((int) Math.round((double) postedJob.getSeconds() / 60)));
+      sign.setLine(3, clickForInfo);
     }
     sign.setEditable(false);
     sign.update();
     if (effects) {
       Location effectLoc = location.clone().add(0.5, 0.5, 0.5);
-      effectLoc.getWorld().playSound(effectLoc, Sound.ENTITY_VILLAGER_WORK_CARTOGRAPHER, 1, 1f);
+      effectLoc.getWorld().playSound(effectLoc, Sound.ENTITY_VILLAGER_WORK_CARTOGRAPHER, 1, 1.3f);
       effectLoc.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, effectLoc, 15, 0.5, 0.5, 0.5);
     }
   }
@@ -409,9 +398,29 @@ public class JobManager {
     }
   }
 
-  public void loadTemplates(VersionedSmartYamlConfiguration file) {
+  public void loadAllTemplates() {
     loadedTemplates.clear();
+    File folder = new File(plugin.getDataFolder(), "templates");
+    File[] listOfFiles = folder.listFiles();
+    for (File f : Objects.requireNonNull(listOfFiles)) {
+      try {
+        loadTemplate(new SmartYamlConfiguration(f));
+      } catch (Exception e) {
+        Bukkit.getLogger().warning("[Jobbo] Failed to load templates from file " + f.getPath());
+        e.printStackTrace();
+      }
+    }
+    Bukkit.getLogger().info("[Jobbo] Loaded " + loadedTemplates.size() + " TOTAL job templates!");
+  }
+
+  public void loadTemplate(SmartYamlConfiguration file) {
+    Bukkit.getLogger().info("[Jobbo] Loading templates from" + file.getCurrentPath());
+    int number = 0;
     for (String key : file.getKeys(false)) {
+      if (loadedTemplates.containsKey(key)) {
+        Bukkit.getLogger().warning("[Jobbo] Detected duplicate job " + key + " in file " + file.getCurrentPath());
+        continue;
+      }
       String jobType = file.getString(key + ".type", "KILL");
       String townId = file.getString(key + ".town-id", "NONE");
       int difficulty = file.getInt(key + ".difficulty", 1);
@@ -444,18 +453,16 @@ public class JobManager {
       jobTemplate.setRerollChance(file.getDouble(key + ".reroll-chance", 0));
 
       jobTemplate.setCompletionNpc(file.getInt(key + ".completion-npc", -1));
-      jobTemplate.setCompletionMessage(StringExtensionsKt
-          .chatColorize(file.getString(key + ".completion-message", "")));
+      jobTemplate.setCompletionMessage(PaletteUtil.color(file.getString(key + ".completion-message", "")));
 
-      jobTemplate.setJobName(StringExtensionsKt.chatColorize(
-          file.getString(key + ".name", "Generic Job")));
+      jobTemplate.setJobName(PaletteUtil.color(file.getString(key + ".name", "Generic Job")));
       jobTemplate.getDescription().clear();
-      jobTemplate.getDescription().addAll(ListExtensionsKt.chatColorize(
-          file.getStringList(key + ".description")));
+      jobTemplate.getDescription().addAll(PaletteUtil.color(file.getStringList(key + ".description")));
       jobTemplate.buildLocation();
 
       loadedTemplates.put(key, jobTemplate);
+      number++;
     }
-    Bukkit.getLogger().info("[Jobbo] Loaded " + loadedTemplates.size() + " job templates!");
+    Bukkit.getLogger().info("[Jobbo] Loaded " + number + " templates!");
   }
 }
